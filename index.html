@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Game • Movie • Anime Finder</title>
+</head>
+
+<body style="background:black; color:white; font-family:Arial; text-align:center;">
+
+  <h1>🎮 Game • 🎬 Movie • 🍥 Anime Finder</h1>
+
+  <input type="text" id="searchBox" placeholder="Search anything..." style="padding:10px; width:200px;">
+
+  <br><br>
+
+  <button onclick="searchAnime()">Anime</button>
+  <button onclick="searchGames()">Games</button>
+  <button onclick="searchMovies()">Movies</button>
+  <button onclick="showFav()">❤️ Favorites</button>
+
+  <hr>
+
+  <div id="result"></div>
+
+  <script>
+
+  // 🍥 ANIME
+  async function searchAnime() {
+    let input = document.getElementById("searchBox").value;
+
+    if(input === "") {
+      document.getElementById("result").innerHTML = "⚠️ Type something!";
+      return;
+    }
+
+    document.getElementById("result").innerHTML = "⏳ Loading...";
+
+    try {
+      let response = await fetch(`https://api.jikan.moe/v4/anime?q=${input}`);
+      let data = await response.json();
+
+      if(!data.data || data.data.length === 0) {
+        document.getElementById("result").innerHTML = "No results 😢";
+        return;
+      }
+
+      let output = "<h2>🍥 Anime Results</h2>";
+
+      data.data.slice(0, 10).forEach(anime => {
+        output += `
+          <div style="margin:10px; border:1px solid white; padding:10px;">
+            <img src="${anime.images.jpg.image_url}" width="120"><br>
+            <b>${anime.title}</b><br>
+            ⭐ ${anime.score}<br>
+            <button onclick="addFav('${anime.title}')">❤️ Save</button>
+          </div>
+        `;
+      });
+
+      document.getElementById("result").innerHTML = output;
+
+    } catch (error) {
+      document.getElementById("result").innerHTML = "Error ❌";
+    }
+  }
+
+  // 🎮 GAMES
+  async function searchGames() {
+    let input = document.getElementById("searchBox").value;
+
+    if(input === "") {
+      document.getElementById("result").innerHTML = "⚠️ Type something!";
+      return;
+    }
+
+    document.getElementById("result").innerHTML = "⏳ Loading...";
+
+    let apiKey = "d5299865b6ad4ef8934ab36849e6109a";
+
+    try {
+      let response = await fetch(`https://api.rawg.io/api/games?key=${apiKey}&search=${input}`);
+      let data = await response.json();
+
+      if(!data.results || data.results.length === 0) {
+        document.getElementById("result").innerHTML = "No results 😢";
+        return;
+      }
+
+      let output = "<h2>🎮 Game Results</h2>";
+
+      data.results.slice(0, 10).forEach(game => {
+        output += `
+          <div style="margin:10px; border:1px solid white; padding:10px;">
+            <img src="${game.background_image}" width="120"><br>
+            <b>${game.name}</b><br>
+            ⭐ ${game.rating}<br>
+            <button onclick="addFav('${game.name}')">❤️ Save</button>
+          </div>
+        `;
+      });
+
+      document.getElementById("result").innerHTML = output;
+
+    } catch (error) {
+      document.getElementById("result").innerHTML = "Error ❌";
+    }
+  }
+
+  // 🎬 MOVIES
+  async function searchMovies() {
+    let input = document.getElementById("searchBox").value;
+
+    if(input === "") {
+      document.getElementById("result").innerHTML = "⚠️ Type something!";
+      return;
+    }
+
+    document.getElementById("result").innerHTML = "⏳ Loading...";
+
+    try {
+      let response = await fetch(`https://www.omdbapi.com/?s=${input}&apikey=thewdb`);
+      let data = await response.json();
+
+      if(!data.Search) {
+        document.getElementById("result").innerHTML = "No results 😢";
+        return;
+      }
+
+      let output = "<h2>🎬 Movie Results</h2>";
+
+      data.Search.slice(0, 10).forEach(movie => {
+        output += `
+          <div style="margin:10px; border:1px solid white; padding:10px;">
+            <img src="${movie.Poster !== "N/A" ? movie.Poster : ''}" width="120"><br>
+            <b>${movie.Title}</b><br>
+            📅 ${movie.Year}<br>
+            <button onclick="addFav('${movie.Title}')">❤️ Save</button>
+          </div>
+        `;
+      });
+
+      document.getElementById("result").innerHTML = output;
+
+    } catch (error) {
+      document.getElementById("result").innerHTML = "Error ❌";
+    }
+  }
+
+  // ❤️ FAVORITES
+  function addFav(name) {
+    let favs = JSON.parse(localStorage.getItem("favorites")) || [];
+
+    if(!favs.includes(name)) {
+      favs.push(name);
+      localStorage.setItem("favorites", JSON.stringify(favs));
+      alert(name + " added ❤️");
+    } else {
+      alert("Already saved 😎");
+    }
+  }
+
+  function showFav() {
+    let favs = JSON.parse(localStorage.getItem("favorites")) || [];
+
+    if(favs.length === 0) {
+      document.getElementById("result").innerHTML = "No favorites yet 😢";
+      return;
+    }
+
+    let output = "<h2>❤️ Favorites</h2>";
+
+    favs.forEach(item => {
+      output += `<p>${item}</p>`;
+    });
+
+    document.getElementById("result").innerHTML = output;
+  }
+
+  </script>
+
+</body>
+</html>
